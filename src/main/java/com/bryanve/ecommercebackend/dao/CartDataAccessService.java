@@ -52,4 +52,16 @@ public class CartDataAccessService implements CartDAO {
         return true;
     }
 
+    @Override
+    public Optional<Cart> getCartByID(int id) {
+        final List<Cart> matches = cartList.stream().filter(c -> c.getId() == id
+        ).collect(Collectors.toList());
+
+        if (matches.isEmpty()) {
+            return Optional.empty();
+        }
+
+        return Optional.ofNullable(matches.get(0));
+    }
+
 }
