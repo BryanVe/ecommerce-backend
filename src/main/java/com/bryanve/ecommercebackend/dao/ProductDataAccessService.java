@@ -12,7 +12,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 @Repository("productDAO")
 public class ProductDataAccessService implements ProductDAO {
 
-    private static final List<Product> productsList = new ArrayList<>();
+    protected static final List<Product> productsList = new ArrayList<>();
 
     @Override
     public Product createProduct(Product product) {
