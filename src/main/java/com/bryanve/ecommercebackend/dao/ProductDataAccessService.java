@@ -28,4 +28,9 @@ public class ProductDataAccessService implements ProductDAO {
         return newProduct;
     }
 
+    @Override
+    public List<Product> getProducts() {
+        return productsList;
+    }
+
 }
