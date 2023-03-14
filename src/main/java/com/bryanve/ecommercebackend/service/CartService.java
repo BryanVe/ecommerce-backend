@@ -6,6 +6,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
+import java.util.Optional;
+
 @Service
 public class CartService {
 
@@ -24,4 +26,7 @@ public class CartService {
         return cartDAO.deleteCartByID(id);
     }
 
+    public Optional<Cart> getCartByID(int id) {
+        return cartDAO.getCartByID(id);
+    }
 }
