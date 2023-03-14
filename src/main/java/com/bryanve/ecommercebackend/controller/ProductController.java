@@ -36,7 +36,7 @@ public class ProductController {
 
         if (products.isEmpty()) {
             message = "No product was found";
-        };
+        }
 
         return ResponseHandler.responseBuilder(message, HttpStatus.OK, products);
     }

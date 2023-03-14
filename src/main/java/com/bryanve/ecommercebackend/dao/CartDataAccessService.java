@@ -1,9 +1,9 @@
 package com.bryanve.ecommercebackend.dao;
 
 import com.bryanve.ecommercebackend.model.Cart;
-import org.springframework.http.HttpStatus;
+import com.bryanve.ecommercebackend.model.Product;
+import com.bryanve.ecommercebackend.response.CartResponse;
 import org.springframework.stereotype.Repository;
-import org.springframework.web.server.ResponseStatusException;
 
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -16,30 +16,9 @@ public class CartDataAccessService implements CartDAO {
     private final Timer timer = new Timer();
 
     @Override
-    public Cart createCart(Cart cart) {
+    public CartResponse createCart(Cart cart) {
         // * Validate if all product IDs exists
-        final List<Integer> productIDs = cart.getProductIDs();
-        final List<Integer> notFoundIDs = productIDs
-                .stream()
-                .filter(productID -> ProductDataAccessService.productsList
-                        .stream()
-                        .noneMatch(p -> p.getId() == productID))
-                .collect(Collectors.toList());
-
-        if (!notFoundIDs.isEmpty()) {
-            final List<String> notFoundIDsAsStrings = notFoundIDs
-                    .stream()
-                    .map(Object::toString)
-                    .collect(Collectors.toList());
-            final String concatenatedIDs = notFoundIDsAsStrings
-                    .stream()
-                    .reduce("", (partialString, element) -> partialString + element + ", ");
-
-            throw new ResponseStatusException(
-                    HttpStatus.BAD_REQUEST, "Next product ids does not exists: " + concatenatedIDs
-            );
-        }
-
+        ProductDataAccessService.validateProductIDs(cart.getProductIDs());
         final Optional<Cart> lastCart = cartList.stream().max(Comparator.comparing(Cart::getId));
 
         AtomicInteger nextID = new AtomicInteger();
@@ -60,7 +39,8 @@ public class CartDataAccessService implements CartDAO {
             }
         }, ttl);
 
-        return newCart;
+        final List<Product> products = ProductDataAccessService.getProductsFromIDs(newCart.getProductIDs());
+        return new CartResponse(newCart.getId(), products);
     }
 
     @Override
@@ -78,15 +58,20 @@ public class CartDataAccessService implements CartDAO {
     }
 
     @Override
-    public Optional<Cart> getCartByID(int id) {
-        final List<Cart> matches = cartList.stream().filter(c -> c.getId() == id
-        ).collect(Collectors.toList());
+    public Optional<CartResponse> getCartByID(int id) {
+        final Optional<Cart> cartMatch = cartList.stream().filter(c -> c.getId() == id
+        ).findFirst();
 
-        if (matches.isEmpty()) {
+        if (cartMatch.isEmpty()) {
             return Optional.empty();
         }
 
-        return Optional.ofNullable(matches.get(0));
+        final Cart foundCart = cartMatch.get();
+        final List<Product> products = ProductDataAccessService.getProductsFromIDs(foundCart.getProductIDs());
+        final CartResponse response = new CartResponse(foundCart.getId(), products);
+
+
+        return Optional.of(response);
     }
 
 }
