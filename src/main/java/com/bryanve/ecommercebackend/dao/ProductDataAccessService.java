@@ -15,7 +15,7 @@ import java.util.stream.Collectors;
 @Repository("productDAO")
 public class ProductDataAccessService implements ProductDAO {
 
-    protected static final List<Product> productsList = new ArrayList<>();
+    protected static List<Product> productsList = new ArrayList<>();
 
     public static List<Product> getProductsFromIDs(List<Integer> ids) {
         return ids.stream().map(i -> {
@@ -67,6 +67,20 @@ public class ProductDataAccessService implements ProductDAO {
     @Override
     public List<Product> getProducts() {
         return productsList;
+    }
+
+    @Override
+    public boolean deleteProductByID(int id) {
+        final boolean productFound = productsList.stream().anyMatch(p -> p.getId() == id);
+
+        if (!productFound) {
+            return false;
+        }
+
+        productsList = productsList.stream().filter(p -> p.getId() != id
+        ).collect(Collectors.toList());
+
+        return true;
     }
 
 }

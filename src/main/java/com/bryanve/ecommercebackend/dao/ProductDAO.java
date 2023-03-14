@@ -10,4 +10,5 @@ public interface ProductDAO {
 
     List<Product> getProducts();
 
+    boolean deleteProductByID(int id);
 }
