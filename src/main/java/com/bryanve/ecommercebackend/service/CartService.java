@@ -20,4 +20,8 @@ public class CartService {
         return cartDAO.createCart(cart);
     }
 
+    public boolean deleteCartByID(int id) {
+        return cartDAO.deleteCartByID(id);
+    }
+
 }
