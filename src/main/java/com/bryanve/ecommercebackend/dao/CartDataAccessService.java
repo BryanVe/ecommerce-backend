@@ -1,7 +1,9 @@
 package com.bryanve.ecommercebackend.dao;
 
 import com.bryanve.ecommercebackend.model.Cart;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Repository;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -15,6 +17,29 @@ public class CartDataAccessService implements CartDAO {
 
     @Override
     public Cart createCart(Cart cart) {
+        // * Validate if all product IDs exists
+        final List<Integer> productIDs = cart.getProductIDs();
+        final List<Integer> notFoundIDs = productIDs
+                .stream()
+                .filter(productID -> ProductDataAccessService.productsList
+                        .stream()
+                        .noneMatch(p -> p.getId() == productID))
+                .collect(Collectors.toList());
+
+        if (!notFoundIDs.isEmpty()) {
+            final List<String> notFoundIDsAsStrings = notFoundIDs
+                    .stream()
+                    .map(Object::toString)
+                    .collect(Collectors.toList());
+            final String concatenatedIDs = notFoundIDsAsStrings
+                    .stream()
+                    .reduce("", (partialString, element) -> partialString + element + ", ");
+
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST, "Next product ids does not exists: " + concatenatedIDs
+            );
+        }
+
         final Optional<Cart> lastCart = cartList.stream().max(Comparator.comparing(Cart::getId));
 
         AtomicInteger nextID = new AtomicInteger();
