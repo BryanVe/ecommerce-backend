@@ -7,4 +7,5 @@ public interface CartDAO {
     Cart createCart(Cart cart);
 
     boolean deleteCartByID(int id);
+
 }
